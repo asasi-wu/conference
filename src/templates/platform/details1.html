@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.2</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+        content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script type="text/javascript" src="../../static/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/tjs/xadmin.js"></script>
+    <script type="text/javascript" src="../../static/tjs/jquery.min.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+            <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+</head>
+
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <form class="layui-form">
+                <div class="layui-form-item">
+                    <label for="uid" class="layui-form-label">ID</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="uid" name="uid" required="" lay-verify="required" autocomplete="off"
+                            class="layui-input"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="floor" class="layui-form-label">楼层</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="floor" name="floor" required="" lay-verify="required" autocomplete="off"
+                            class="layui-input"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="room" class="layui-form-label">房间号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="room" name="room" required="" lay-verify="phone" autocomplete="off"
+                            class="layui-input"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="seats" class="layui-form-label">座位数</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="seats" name="seats" required="" lay-verify="required" autocomplete="off"
+                            class="layui-input"></div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <div class="layui-fluid">
+                        <div class="layui-row">
+                            <div class="layui-card-body layui-table-body layui-table-main">
+                                <table class="layui-table layui-form">
+                                    <thead>
+                                        <tr>
+                                            <th>日期</th>
+                                            <th>星期</th>
+                                            <th>可预约时间</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="infos">
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_repass" class="layui-form-label"></label>
+                    <button type="button" class="layui-btn" onclick="change()">确定</button></div>
+            </form>
+        </div>
+    </div>
+    <script>layui.use(['form', 'layer'],
+            function () {
+                $ = layui.jquery;
+                var form = layui.form,
+                    layer = layui.layer;
+
+                //自定义验证规则
+                form.verify({
+                    nikename: function (value) {
+                        if (value.length < 5) {
+                            return '昵称至少得5个字符啊';
+                        }
+                    },
+                    pass: [/(.+){6,12}$/, '密码必须6到12位'],
+                    repass: function (value) {
+                        if ($('#L_pass').val() != $('#L_repass').val()) {
+                            return '两次密码不一致';
+                        }
+                    }
+                });
+
+                //监听提交
+                form.on('submit(add)',
+                    function (data) {
+                        console.log(data);
+                        //发异步，把数据提交给php
+                        layer.alert("增加成功", {
+                            icon: 6
+                        },
+                            function () {
+                                // 获得frame索引
+                                var index = parent.layer.getFrameIndex(window.name);
+                                //关闭当前frame
+                                parent.layer.close(index);
+                            });
+                        return false;
+                    });
+
+            });</script>
+</body>
+
+<script>
+    var roomid;
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) { return pair[1]; }
+        }
+        return (false);
+    }
+    Date.prototype.Format = function (fmt) {
+        let o = {
+            "M+": this.getMonth() + 1, //月份
+            "d+": this.getDate(), //日
+            "h+": this.getHours(), //小时
+            "m+": this.getMinutes(), //分
+            "s+": this.getSeconds(), //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (let k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    };
+    window.onload = function () {
+        roomid = getQueryVariable('id');
+        $.ajax({
+            url: '/get-room-information',
+            method: 'POST',
+            data: { id: roomid },
+            success: function (data) {
+                data = JSON.parse(data);
+                if (data.state == 'succeed') {
+                    $("#uid").val(data.data1[0][0]);
+                    $("#floor").val(data.data1[0][1]);
+                    $("#room").val(data.data1[0][2]);
+                    $("#seats").val(data.data1[0][3]);
+                    addWeekInfo(data.data2);
+                } else {
+                    console.log(data.message);
+                }
+            }
+        })
+    }
+
+    function addWeekInfo(data) {
+        str = "";
+        var week = new Date().getDay();
+        week = week - 1;
+        for (var i = 0; i < 7; i++) {
+            var ff = new Date();
+            var date2 = new Date(ff);
+            date2.setDate(ff.getDate() + i);
+            var sec = date2.getFullYear() + "-" + (date2.getMonth() + 1) + "-" + date2.getDate();
+            var j = week + i;
+            if (j > 6) j = j - 7;
+            str += `<tr>
+                            <td>`+ sec + `</td>
+                            <td>`+ data[j][1] + `</td>
+                            <td class="td-manage">
+                            <input type="text" id="`+ j + `" name="weeks" required="" lay-verify="phone" autocomplete="off"
+                                value="`+ data[j][2] + `" class="layui-input">
+                            </td>
+                        </tr>`
+
+        }
+        document.getElementById("infos").innerHTML = str;
+    }
+
+    function change() {
+        var tempdata = {
+                    "0":$("#0").val(),
+                    "1":$("#1").val(), 
+                    "2":$("#2").val(), 
+                    "3":$("#3").val(), 
+                    "4":$("#4").val(), 
+                    "5":$("#5").val(), 
+                    "6":$("#6").val()
+                };
+        $.ajax({
+            url: '/change-information',
+            method: 'POST',
+            data: {
+                oid:roomid,
+                nid: $("#uid").val(),
+                floor: $("#floor").val(),
+                room_number: $("#room").val(),
+                seats_number: $("#seats").val(),
+                time_period: JSON.stringify(tempdata)
+            },
+            success: function (data) {
+                msg = JSON.parse(data);
+                if (msg.state == 'succeed') {
+                    layer.alert("修改成功", { icon: 6 }, function () {
+                        xadmin.close();
+                        xadmin.father_reload();
+                    });
+                } else {
+                    layer.msg("增加失败，错误为" + msg.message, {
+                        icon: 5
+                    });
+                }
+            }
+        })
+    }
+
+    function addElement(data) {
+        var tempstr = "<tr>";
+        for (var i = 0; i < data.length; i++) {
+            for (var j = 0; j < 4; j++) {
+                tempstr += "<td>" + data[i][j] + "</td>";
+            }
+            tempstr += `<td class="td-manage">
+			<a title="删除" onclick="member_del(this,'要删除的id')" href="javascript:;">
+				<i class="layui-icon">&#xe640;</i>
+			</a>
+		</td>
+		<td class="td-manage">
+			<a title="查看详情" onclick="xadmin.open('修改信息','./details1.html?id=`+ data[i][0] + `',800,600)"
+				href="javascript:;">
+				<i class="layui-icon">&#xe702;</i>
+			</a>
+		</td></tr>`
+        };
+        document.getElementById("tablebody").innerHTML = tempstr;
+    };
+</script>
+
+</html>

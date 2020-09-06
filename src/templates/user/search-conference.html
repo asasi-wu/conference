@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.2</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+        content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/tjs/xadmin.js"></script>
+</head>
+
+<body>
+    <div class="x-nav">
+        <span class="layui-breadcrumb">
+            <a href="">会议室预约</a>
+            <a>
+                <cite>会议室查询</cite></a>
+        </span>
+        <a class="layui-btn layui-btn-small" style="line-height:1.6em;margin-top:3px;float:right"
+            onclick="location.reload()" title="刷新">
+            <i class="layui-icon layui-icon-refresh" style="line-height:30px"></i></a>
+    </div>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <form class="layui-form" enctype="multipart/form-data" action="">
+                <div class="layui-form-item">
+                    <label for="L_calendar" class="layui-form-label">日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="L_calendar" name="calendar" class="layui-input" placeholder="yyyy-MM-dd">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_timer" class="layui-form-label">时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="L_timer" name="timer" class="layui-input" placeholder="HH:mm"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_seats" class="layui-form-label">
+                        <span class="x-red">*</span>会议室人数</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="L_seats" name="seats" required="" lay-verify="seats" autocomplete="off"
+                            class="layui-input"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_repass" class="layui-form-label"></label>
+                    <button type="button" class="layui-btn" id="uploadBtn">确定</button></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        layui.use(['form', 'layer', 'jquery', 'upload', 'laydate'],
+            function () {
+                var $$ = layui.jquery;
+                var formx = layui.form;
+                var layer = layui.layer;
+                var laydate = layui.laydate;
+
+                //自定义验证规则
+                formx.verify({
+                    nikename: function (value) {
+                        if (value.length < 5) {
+                            return '昵称至少得5个字符啊';
+                        }
+                    },
+                    pass: [/(.+){6,12}$/, '密码必须6到12位'],
+                    repass: function (value) {
+                        if ($('#L_pass').val() != $('#L_repass').val()) {
+                            return '两次密码不一致';
+                        }
+                    }
+                });
+
+
+                var fir = new Date().Format('yyyy-MM-dd');
+                var ff = new Date();
+                var date2 = new Date(ff);
+                date2.setDate(ff.getDate() + 7);
+                var sec = date2.getFullYear() + "-" + (date2.getMonth() + 1) + "-" + date2.getDate();
+
+                laydate.render({
+                    elem: '#L_calendar' //或 elem: document.getElementById('test')、elem: lay('#test') 等（类型：String/DOM，默认值：无必填项，用于绑定执行日期渲染的元素，值一般为选择器，或DOM对象）
+                    , type: 'date'//year-只提供年列表选择||month-只提供年、月选择||date-可选择：年、月、日。type默认值，一般可不填||time-只提供时、分、秒选择||datetime-可选择：年、月、日、时、分、秒
+                    , range: false //或 range: '~' 来自定义分割字符
+                    , format: 'yyyy-MM-dd' //可任意组合 yyyy年MM月dd日 HH时mm分ss秒===2017年08月18日 20时08分08秒，'yyyy/mm/dd'
+                    , value: fir //必须遵循format参数设定的格式String，默认值：new Date()
+                    , min: fir   //min/max - 最小/大范围内的日期时间值 类型：string，默认值：min: '1900-1-1'、max: '2099-12-31'
+                    , max: sec
+                    , trigger: 'click' // 自定义弹出控件的事件(类型：String，默认值：focus，如果绑定的元素非输入框，则默认事件为：click)-采用click弹出
+                    , show: false //默认显示-类型：Boolean，默认值：false;;;;如果设置: true，则控件默认显示在绑定元素的区域。通常用于外部事件调用控件
+                    , position: 'absolute'//类型：String，默认值：absolute (fixed,absolute,static)
+                    , zIndex: 66666666//层叠顺序-类型：Number，默认值：66666666一般用于解决与其它元素的互相被遮掩的问题。如果 position 参数设为 static 时，该参数无效
+                    , showBottom: true//是否显示底部栏--类型：Boolean，默认值：true如果设置 false，将不会显示控件的底部栏区域
+                    , btns: ['clear', 'now', 'confirm']//类型：Array，默认值：['clear', 'now', 'confirm'](显示清空，今天，确认)
+                    , lang: 'cn'//语言类型：String，默认值：cn--内置了两种语言版本：cn（中文版）、en（国际版，即英文版）
+                    , theme: 'grid'//主题-类型：String，默认值：default，theme的可选值有：default（默认简约）、molv（墨绿背景）、#颜色值（自定义颜色背景）、grid（格子主题）
+                    , calendar: true//是否显示公历节日--类型：Boolean，默认值：false
+                    // , mark: {//标注重要日子--类型：Object，默认值：无
+                    //     '0-10-14': '生日'
+                    //     , '0-12-31': '跨年' //每年12月31日
+                    //     , '0-0-10': '工资' //每个月10号
+                    //     , '2017-8-15': '' //具体日期
+                    //     , '2017-8-20': '预发' //如果为空字符，则默认显示数字+徽章
+                    //     , '2017-8-21': '发布'
+                    // }
+                    , ready: function (date) {//控件在打开时触发，回调返回一个参数
+                        // console.log('初始日期对象' + date.year + date.month + date.date); //得到初始的日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                    }
+                    , done: function (value, date, endDate) {//控件选择完毕后的回调---点击日期、清空、现在、确定均会触发。
+                        // console.log(value); //得到日期生成的值，如：2017-08-18
+                        // console.log('start:' + date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                        // console.log('end' + endDate); //得结束的日期时间对象，开启范围选择（range: true）才会返回。对象成员同上。
+                    }
+                });
+                laydate.render({
+                    elem: '#L_timer' //或 elem: document.getElementById('test')、elem: lay('#test') 等（类型：String/DOM，默认值：无必填项，用于绑定执行日期渲染的元素，值一般为选择器，或DOM对象）
+                    , type: 'time'//year-只提供年列表选择||month-只提供年、月选择||date-可选择：年、月、日。type默认值，一般可不填||time-只提供时、分、秒选择||datetime-可选择：年、月、日、时、分、秒
+                    , range: false //或 range: '~' 来自定义分割字符
+                    , format: 'HH:mm' //可任意组合 yyyy年MM月dd日 HH时mm分ss秒===2017年08月18日 20时08分08秒，'yyyy/mm/dd'
+                    , value: '08:00' //必须遵循format参数设定的格式String，默认值：new Date()
+                    , min: '08:00:00'   //min/max - 最小/大范围内的日期时间值 类型：string，默认值：min: '1900-1-1'、max: '2099-12-31'
+                    , max: '20:00:00'
+                    , trigger: 'click' // 自定义弹出控件的事件(类型：String，默认值：focus，如果绑定的元素非输入框，则默认事件为：click)-采用click弹出
+                    , show: false //默认显示-类型：Boolean，默认值：false;;;;如果设置: true，则控件默认显示在绑定元素的区域。通常用于外部事件调用控件
+                    , position: 'absolute'//类型：String，默认值：absolute (fixed,absolute,static)
+                    , zIndex: 66666666//层叠顺序-类型：Number，默认值：66666666一般用于解决与其它元素的互相被遮掩的问题。如果 position 参数设为 static 时，该参数无效
+                    , showBottom: true//是否显示底部栏--类型：Boolean，默认值：true如果设置 false，将不会显示控件的底部栏区域
+                    , btns: ['clear', 'now', 'confirm']//类型：Array，默认值：['clear', 'now', 'confirm'](显示清空，今天，确认)
+                    , lang: 'cn'//语言类型：String，默认值：cn--内置了两种语言版本：cn（中文版）、en（国际版，即英文版）
+                    , theme: 'grid'//主题-类型：String，默认值：default，theme的可选值有：default（默认简约）、molv（墨绿背景）、#颜色值（自定义颜色背景）、grid（格子主题）
+                    , calendar: true//是否显示公历节日--类型：Boolean，默认值：false
+                    // , mark: {//标注重要日子--类型：Object，默认值：无
+                    //     '0-10-14': '生日'
+                    //     , '0-12-31': '跨年' //每年12月31日
+                    //     , '0-0-10': '工资' //每个月10号
+                    //     , '2017-8-15': '' //具体日期
+                    //     , '2017-8-20': '预发' //如果为空字符，则默认显示数字+徽章
+                    //     , '2017-8-21': '发布'
+                    // }
+                    , ready: function (date) {//控件在打开时触发，回调返回一个参数
+                        // console.log('初始日期对象' + date.year + date.month + date.date); //得到初始的日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                    }
+                    , done: function (value, date, endDate) {//控件选择完毕后的回调---点击日期、清空、现在、确定均会触发。
+                        // console.log(value); //得到日期生成的值，如：2017-08-18
+                        // console.log('start:' + date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                        // console.log('end' + endDate); //得结束的日期时间对象，开启范围选择（range: true）才会返回。对象成员同上。
+                    }
+                });
+            });
+        Date.prototype.Format = function (fmt) {
+            let o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "h+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (let k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        };
+
+        function addInput() {
+            document.getElementById('addinput').style.display = 'none';
+            addNew();
+        };
+
+        function addNew() {
+            var newElement = '<div class="layui-inline"><div class="layui-input-inline"><input type="text" name="properties" required="" class="layui-input"></div><div class="layui-btn-group"><button type="button" class="layui-btn layui-btn-primary layui-btn-sm" onclick="addNew()"><i class="layui-icon layui-icon-add-circle-fine"></i></button><button type="button" class="layui-btn layui-btn-primary layui-btn-sm" onclick="delectElement(this)"><i class="layui-icon layui-icon-delete"></i></button></div></div>'
+            $('#property').append(newElement);
+        };
+
+        function delectElement(th) {
+            th.parentNode.parentNode.remove();
+            var judge = document.getElementById('property').lastChild.nodeName;
+            if (judge == 'BUTTON') document.getElementById('addinput').style.display = 'block';
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.2</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+        content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../static/css/font.css">
+    <link rel="stylesheet" href="../../static/css/xadmin.css">
+    <script src="../../static/lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../static/tjs/xadmin.js"></script>
+    <script type="text/javascript" src="../../static/tjs/jquery.min.js"></script>
+</head>
+
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <form class="layui-form" enctype="multipart/form-data" action="">
+                <div class="layui-form-item">
+                    <label for="L_floor" class="layui-form-label">楼层</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="L_floor" name="floor" required="" lay-verify="floor" autocomplete="off"
+                            class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_roomno" class="layui-form-label">房间号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="L_roomno" name="roomno" required="" lay-verify="roomno"
+                            autocomplete="off" class="layui-input"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="L_seats" class="layui-form-label">
+                        <span class="x-red">*</span>座位数</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="L_seats" name="seats" required="" lay-verify="seats" autocomplete="off"
+                            class="layui-input"></div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label for="L_repass" class="layui-form-label"></label>
+                    <button type="button" class="layui-btn" id="uploadBtn" lay-filter="submit">确定</button></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        layui.use(['form', 'layer', 'jquery',],
+            function () {
+                var $$ = layui.jquery;
+                var form = layui.form;
+                var layer = layui.layer;
+
+
+                //自定义验证规则
+                form.verify({
+                    floor: function (value) {
+                        if (value < 1 || value > 35) {
+                            return '楼层超出范围';
+                        }
+                    },
+                    seats: function (value) {
+                        if (value < 1) {
+                            return '人数不能小于1人';
+                        }
+                        else if (value > 1000) {
+                            return '没有超过1000人数的会议室'
+                        }
+                    }
+                });
+            });
+        $("#uploadBtn").click(function () {
+            var data = {};
+            data.id = $('#L_floor').val() + '-' + $('#L_roomno').val();
+            data.floor = $('#L_floor').val();
+            data.room_number = $('#L_roomno').val();
+            data.seats_number = $('#L_seats').val();
+            $.ajax({
+                url: '/add-conference',
+                method: 'POST',
+                data: data,
+                success: function (msg) {
+                    msg = JSON.parse(msg);
+                    if (msg.state == 'succeed') {
+                        layer.alert("增加成功", { icon: 6 }, function () {
+                            xadmin.close();
+                            xadmin.father_reload();
+                        });
+                    } else {
+                        layer.msg("增加失败，错误为" + msg.message, {
+                            icon: 5
+                        });
+                    }
+                }
+            })
+        });
+    </script>
+</body>
+
+</html>
